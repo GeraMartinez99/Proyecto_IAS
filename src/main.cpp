@@ -1,4 +1,22 @@
 #include <Arduino.h>
+#include <Arduino.h>
+#include <WiFi.h>
+#include <PubSubClient.h>
+
+const char* ssid = "c5862c";
+const char* password = "280608396";
+
+const char* mqtt_server = 	"driver.cloudmqtt.com";
+const int mqtt_port = 18651;
+const char *mqtt_user = "clxxwiek";
+const char* mqtt_pass = "PtsiiKX9xhVm"; 
+
+WiFiClient espClient;
+PubSubClient client(espClient);
+
+long lastMsg = 0;
+char msg[50];
+int value = 0;
 
 //Este arreglo se refiere a las columnas del cubo (están conectados por por la patita positiva o ánodo)
 int anodos[] = {15,2,4,16,17,5,18,19,21,3,1,22,23,13,12,14}; 
@@ -6,16 +24,95 @@ int anodos[] = {15,2,4,16,17,5,18,19,21,3,1,22,23,13,12,14};
 int catodos[] = {32,33,25,26}; 
 
 
+void callback(char *topic, byte *payload, unsigned int length)
+{
+  Serial.print("Mensaje recibido bajo el tópico-> ");
+  Serial.print(topic);
+  Serial.print("\n");
+
+  for (int i = 0; i < length; i++)
+  {
+    Serial.print((char)payload[i]);
+  }
+
+  if( (char)payload[0] == '0'){
+    viborita(500);
+  }
+  if( (char)payload[0] == '1'){
+    radar(500);
+  }
+
+  Serial.println();
+}
+
+
+void reconnect()
+{
+  while (!client.connected())
+  {
+    Serial.println("Intentando Conexión MQTT");
+
+    String clientId = "iot_1_";
+    clientId = clientId + String(random(0xffff), HEX);
+
+    if (client.connect(clientId.c_str(), mqtt_user, mqtt_pass))
+    {
+      Serial.println("Conexión a MQTT exitosa!!");
+      client.publish("gmh", "primer mensaje");
+      client.subscribe("entradaGMH");
+    }
+    else
+    {
+      Serial.println("Falló la conexión ");
+      Serial.print(client.state());
+      Serial.print(" Se intentará de nuevo en 5 segundos");
+      delay(5000);
+    }
+  }
+}
+
+
+void setup_wifi()
+{
+  // put your setup code here, to run once:
+  Serial.begin(115200);
+  delay(10);
+
+  Serial.println("");
+  Serial.println("");
+
+  Serial.println("Conectado a -> ");
+  Serial.println(ssid);
+
+  //Me conecto a la red WiFi
+  WiFi.begin(ssid, password);
+
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    Serial.println(".");
+    delay(250);
+  }
+
+  Serial.println("");
+  Serial.println("Conexión Exitosa!");
+
+  Serial.println("Mi ip es -> ");
+  Serial.println(WiFi.localIP());
+}
+
 void setup() {
     // put your setup code here, to run once:
 
-  Serial.begin(9600);
   for (int i = 0; i < 16; i++) {
     pinMode(anodos[i], OUTPUT);
   }
   for (int i = 0; i < 4; i++) { 
     pinMode(catodos[i], OUTPUT);
   }
+
+  setup_wifi();
+  client.setServer(mqtt_server, mqtt_port);
+  client.setCallback(callback);
 }
 
 void controlarCatodos (int n1, int n2, int n3, int n4) {
@@ -421,31 +518,36 @@ indiceA = moverIndiceLed(indiceA, i+1);
 }
 void loop() {
 
-  for (int i = 0; i < 4; i++) { 
-    viborita(100);
-  }
-  for (int i = 0; i < 4; i++) { 
-    gravedad(100);
-  }
-  for (int i = 0; i < 4; i++) { 
-    viboritaPorNivel(100);
-  }
-  for (int i = 0; i < 4; i++) { 
-    radar(100);
-  }
-  for (int i = 0; i < 4; i++) { 
-    relampago(100);
-  }
-  for (int i = 0; i < 4; i++) { 
-    mono(100);
-  }
+  // for (int i = 0; i < 4; i++) { 
+  //   viborita(100);
+  // }
+  // for (int i = 0; i < 4; i++) { 
+  //   gravedad(100);
+  // }
+  // for (int i = 0; i < 4; i++) { 
+  //   viboritaPorNivel(100);
+  // }
+  // for (int i = 0; i < 4; i++) { 
+  //   radar(100);
+  // }
+  // for (int i = 0; i < 4; i++) { 
+  //   relampago(100);
+  // }
+  // for (int i = 0; i < 4; i++) { 
+  //   mono(100);
+  // }
 
-  for (int i = 0; i < 4; i++) { 
-    intercalado(100);
-  }
-  for(int i = 0; i < 4; i++){
-    expansion(100);
-  }
+  // for (int i = 0; i < 4; i++) { 
+  //   intercalado(100);
+  // }
+  // for(int i = 0; i < 4; i++){
+  //   expansion(100);
+  // }
 
+  if (client.connected() == false)
+  {
+    reconnect();
+  }
+  client.loop();
 }
 
