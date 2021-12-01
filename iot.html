@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iot 1</title>
+</head>
+<body>
+    <h1>Iot 1</h1>
+    <div id="display">
+        <button onclick="command(0)" type="button">Vibora</button>
+        <button onclick="command(1)" type="button">Encender</button>
+        <button onclick="command(2)" type="button">Encender</button>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.js" type="text/javascript"></script>
+
+    <script type="text/javascript">
+        var clientId = "client_id_" + Math.floor((Math.random() * 1000000) + 1);
+        client = new Paho.MQTT.Client("driver.cloudmqtt.com", 38651, clientId);
+         
+
+        
+        client.onConnectionLost = onConnectionLost;
+        client.onMessageArrived = onMessageArrived;
+
+        var options = {
+            useSSL: true,
+            userName: "clxxwiek",
+            password: "PtsiiKX9xhVm",
+            onSuccess: onConnect,
+            onFailure: doFail
+        }
+
+        client.connect(options);
+
+        function onConnect(){
+            console.log("Conexión exitosa!");
+            client.subscribe("gmh");
+        }
+
+        function onMessageArrived(message){
+            console.log("Un mensaje ha llegado: " + message.payloadString);
+        }
+
+        function doFail(e){
+            console.log(e);
+        }
+
+        function onConnectionLost(responseObject){
+            if(responseObject.errorCode !== 0){
+                console.log("onConnectionLost: " + responseObject.errorMessage);
+            }
+        }
+
+        function command(value) {
+            console.log(value);
+            message = new Paho.MQTT.Message(value + "");
+            message.destinationName = "entradaGMH";
+            client.send(message);
+        }
+
+    </script>
+</body>
+</html>
