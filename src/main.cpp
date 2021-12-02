@@ -14,12 +14,9 @@ const char* mqtt_pass = "PtsiiKX9xhVm";
 WiFiClient espClient;
 PubSubClient client(espClient);
 
-long lastMsg = 0;
-char msg[50];
-int value = 0;
 
 //Este arreglo se refiere a las columnas del cubo (están conectados por por la patita positiva o ánodo)
-int anodos[] = {15,2,4,16,17,5,18,19,21,3,1,22,23,13,12,14}; 
+int anodos[] = {15,2,4,16,17,5,18,19,21,3,27,22,23,13,12,14}; 
 //Este segundo arreglo hace referencia a los niveles de nuestro cubo que están conectados por medio del cátodo o la patita negativa
 int catodos[] = {32,33,25,26}; 
 
@@ -464,13 +461,13 @@ void expansion(int tiempo) {
 
 void callback(char *topic, byte *payload, unsigned int length)
 {
-  Serial.print("Mensaje recibido bajo el tópico-> ");
-  Serial.print(topic);
-  Serial.print("\n");
+  //Serial.print("Mensaje recibido bajo el tópico-> ");
+  //Serial.print(topic);
+  //Serial.print("\n");
 
   for (int i = 0; i < length; i++)
   {
-    Serial.print((char)payload[i]);
+    //Serial.print((char)payload[i]);
   }
 
   if( (char)payload[0] == '1'){
@@ -499,7 +496,7 @@ void callback(char *topic, byte *payload, unsigned int length)
   }
 
 
-  Serial.println();
+  //Serial.println();
 }
 
 
@@ -507,22 +504,22 @@ void reconnect()
 {
   while (!client.connected())
   {
-    Serial.println("Intentando Conexión MQTT");
+    //Serial.println("Intentando Conexión MQTT");
 
     String clientId = "iot_1_";
     clientId = clientId + String(random(0xffff), HEX);
 
     if (client.connect(clientId.c_str(), mqtt_user, mqtt_pass))
     {
-      Serial.println("Conexión a MQTT exitosa!!");
-      client.publish("gmh", "primer mensaje");
-      client.subscribe("entradaGMH");
+      //Serial.println("Conexión a MQTT exitosa!!");
+      //client.publish("gmh", "primer mensaje");
+      //client.subscribe("entradaGMH");
     }
     else
     {
-      Serial.println("Falló la conexión ");
-      Serial.print(client.state());
-      Serial.print(" Se intentará de nuevo en 5 segundos");
+      //Serial.println("Falló la conexión ");
+      //Serial.print(client.state());
+      //Serial.print(" Se intentará de nuevo en 5 segundos");
       delay(5000);
     }
   }
@@ -532,29 +529,29 @@ void reconnect()
 void setup_wifi()
 {
   // put your setup code here, to run once:
-  Serial.begin(115200);
+  //Serial.begin(115200);
   delay(10);
 
-  Serial.println("");
-  Serial.println("");
+  //Serial.println("");
+  //Serial.println("");
 
-  Serial.println("Conectado a -> ");
-  Serial.println(ssid);
+  //Serial.println("Conectado a -> ");
+  //Serial.println(ssid);
 
   //Me conecto a la red WiFi
   WiFi.begin(ssid, password);
 
   while (WiFi.status() != WL_CONNECTED)
   {
-    Serial.println(".");
+    //Serial.println(".");
     delay(250);
   }
 
-  Serial.println("");
-  Serial.println("Conexión Exitosa!");
+  //Serial.println("");
+  //Serial.println("Conexión Exitosa!");
 
-  Serial.println("Mi ip es -> ");
-  Serial.println(WiFi.localIP());
+  //Serial.println("Mi ip es -> ");
+  //Serial.println(WiFi.localIP());
 }
 
 void setup() {
