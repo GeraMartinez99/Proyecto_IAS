@@ -512,8 +512,8 @@ void reconnect()
     if (client.connect(clientId.c_str(), mqtt_user, mqtt_pass))
     {
       //Serial.println("Conexión a MQTT exitosa!!");
-      //client.publish("gmh", "primer mensaje");
-      //client.subscribe("entradaGMH");
+      client.publish("gmh", "primer mensaje");
+      client.subscribe("entradaGMH");
     }
     else
     {
